@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
 import { LOGGED_IN, setConstraint } from "../constraints";
 import DeleteIcon from '@mui/icons-material/Delete';
 import ContactsIcon from '@mui/icons-material/Contacts';
 import { motion } from 'framer-motion'
 import { toast } from 'react-toastify';
-import axios from "axios";
+import api from '../api/axios';
 import {
   Modal,
   Button,
@@ -15,7 +16,7 @@ import {
 import { Carousel } from 'react-carousel-minimal'
 import {MdDateRange} from 'react-icons/md'
 import {GrMap} from 'react-icons/gr'
-
+import RealTimeChat from './RealTimeChat';
 
 
 function ItemPage() {
@@ -24,9 +25,18 @@ function ItemPage() {
   const [show, setShow] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [showContact, setShowContact] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
 
   const [loading, setloading] = useState(false);
   const [slides, setSlides] = useState([])
+
+  // --- Comment Section ---
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState("");
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [commentSubmitting, setCommentSubmitting] = useState(false);
+  const user = JSON.parse(window.localStorage.getItem('user'));
+  const token = window.localStorage.getItem('token');
 
 
   const handleCloseDelete = () => setShowDelete(false);
@@ -44,15 +54,31 @@ function ItemPage() {
   
 
   const item_id = queryParams.get('cid');
+  const highlightComment = queryParams.get('highlightComment') === 'true';
 
 
-  const current_user = queryParams.get('type').split("/")[1];
+  const typeParam = queryParams.get('type');
+  const current_user = typeParam ? typeParam.split("/")[1] : null;
 
   console.log(current_user)
   
+  // Ref and state for highlighting comment section
+  const commentSectionRef = useRef(null);
+  const [highlight, setHighlight] = useState(false);
+
+  // Scroll and highlight comment section if highlightComment is true
   useEffect(() => {
-    axios({
-      url: `http://localhost:4000/items/${item_id}`,
+    if (highlightComment && commentSectionRef.current) {
+      commentSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setHighlight(true);
+      const timer = setTimeout(() => setHighlight(false), 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [highlightComment, commentsLoading]);
+
+  useEffect(() => {
+    api({
+      url: `/items/${item_id}`,
       method: "GET",
     })
       .then((response) => {
@@ -195,14 +221,14 @@ function ItemPage() {
                         textTransform: 'none',
                         borderRadius: '8px',
                       }}
-                      onClick={handleShowContact}
+                      onClick={() => setChatOpen(true)}
                     >
                       <motion.div
                         whileHover={{ scale: [null, 1.05, 1.05] }}
                         transition={{ duration: 0.4 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        Contact
+                        Message Owner
                       </motion.div>
                     </Button>
                   )}
@@ -323,10 +349,96 @@ function ItemPage() {
       });
   },[]);
 
+  // Fetch comments when item_id changes
+  useEffect(() => {
+    if (!item_id) return;
+    setCommentsLoading(true);
+    api.get(`/comments/${item_id}`)
+      .then(res => {
+        setComments(res.data.comments || []);
+        setCommentsLoading(false);
+      })
+      .catch(() => setCommentsLoading(false));
+  }, [item_id]);
+
+  // Add a new comment
+  const handleAddComment = (e) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+    setCommentSubmitting(true);
+    api.post(`/comments/${item_id}`, {
+      userId: user?._id,
+      text: newComment.trim(),
+    })
+      .then(res => {
+        setComments([res.data.comment, ...comments]);
+        setNewComment("");
+        setCommentSubmitting(false);
+      })
+      .catch(() => setCommentSubmitting(false));
+  };
+
+  // Delete a comment
+  const handleDeleteComment = (commentId) => {
+    api.delete(`/comments/${commentId}`)
+      .then(() => {
+        setComments(comments.filter(c => c._id !== commentId));
+      });
+  };
+
+  // Render comment section below item details
+  const commentSection = (
+    <Stack mt={4} spacing={2}>
+      <Typography variant="h5" color="primary">Comments</Typography>
+      {commentsLoading ? (
+        <Typography>Loading comments...</Typography>
+      ) : (
+        <>
+          {user && (
+            <form onSubmit={handleAddComment} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <Avatar src={user.img} />
+              <input
+                type="text"
+                value={newComment}
+                onChange={e => setNewComment(e.target.value)}
+                placeholder="Add a comment..."
+                style={{ flex: 1, padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
+                disabled={commentSubmitting}
+              />
+              <Button type="submit" variant="contained" color="primary" disabled={commentSubmitting || !newComment.trim()}>
+                Post
+              </Button>
+            </form>
+          )}
+          <Stack spacing={2} mt={2}>
+            {comments.length === 0 && <Typography>No comments yet.</Typography>}
+            {comments.map(comment => (
+              <Stack key={comment._id} direction="row" spacing={2} alignItems="center" sx={{ background: '#f5f5f5', borderRadius: 2, p: 2 }}>
+                <Avatar src={comment.userId?.img} />
+                <Stack flex={1}>
+                  <Typography fontWeight="bold">{comment.userId?.nickname || 'User'}</Typography>
+                  <Typography>{comment.text}</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {new Date(comment.createdAt).toLocaleString()}
+                  </Typography>
+                </Stack>
+                {user && comment.userId && user._id === comment.userId._id && (
+                  <Button size="small" color="error" onClick={() => handleDeleteComment(comment._id)}>
+                    Delete
+                  </Button>
+                )}
+              </Stack>
+            ))}
+          </Stack>
+        </>
+      )}
+    </Stack>
+  );
+
   const delete_item = () => {
     console.log("deleted");
-    axios({
-      url: `http://localhost:4000/items/delete/${item_id}`,
+    api({
+      url: `/items/delete/${item_id}`,
       method: "DELETE",
     })
       .then((response) => {
@@ -349,7 +461,11 @@ function ItemPage() {
       });
   };
 
-  
+  // Add animation variants
+  const fadeSlideIn = {
+    hidden: { opacity: 0, y: 40 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, type: 'spring' } }
+  };
 
   return (
     <>
@@ -396,7 +512,12 @@ function ItemPage() {
                     maxWidth: '1440px',
                 }}
             >
-                {itemDetails}
+                <motion.div initial="hidden" animate="visible" variants={fadeSlideIn}>
+                  {itemDetails}
+                </motion.div>
+                <motion.div initial="hidden" animate="visible" variants={fadeSlideIn}>
+                  {commentSection}
+                </motion.div>
             </Stack>
         </Stack>
         <Modal
@@ -524,6 +645,12 @@ function ItemPage() {
                         </Stack>
                       </Modal>
 
+    {/* Example real-time chat UI for demonstration */}
+    {user && item && item.userId && user._id !== item.userId._id && (
+      <div style={{ marginTop: 32 }}>
+        <RealTimeChat currentUser={user} otherUser={item.userId} itemId={item._id} />
+      </div>
+    )}
 
     </>
   );

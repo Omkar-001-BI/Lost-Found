@@ -1,6 +1,28 @@
 import mongoose from "mongoose";
 
 const ItemsSchema = new mongoose.Schema({
+    // Sample items for testing
+    /*
+    Example items:
+    {
+        name: 'Blue Backpack',
+        description: 'A navy blue Jansport backpack with silver zippers',
+        type: 'Lost',
+        location: 'University Library',
+        date: '2024-01-15',
+        number: '555-0123',
+        img: 'uploads/backpack.jpg'
+    },
+    {
+        name: 'Gold Watch',
+        description: 'Found a gold-colored analog watch near the cafeteria',
+        type: 'Found',
+        location: 'Student Center Cafeteria',
+        date: '2024-01-16',
+        number: '555-0124',
+        img: 'uploads/watch.jpg'
+    }
+    */
     name: 
     { type: String, default: 'No Name' },
 

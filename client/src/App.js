@@ -9,7 +9,9 @@ import Home from "./Components/Home";
 import ItemPage from "./Components/ItemPage";
 import LostItem from "./Components/Lost_item";
 import MyListings from "./Components/MyListings";
-import Layout from "./layout"; 
+import Layout from "./layout";
+import NotificationHistory from "./Components/NotificationHistory";
+import MyMessages from "./Components/MyMessages";
 window.OneSignal = window.OneSignal || [];
 const OneSignal = window.OneSignal;
 function App() {
@@ -28,6 +30,8 @@ function App() {
           <Route path="/postitem" element={<LostItem/>} />
           <Route path="/mylistings" element={<MyListings/>} />
           <Route path="/:item" element={<ItemPage/>} />
+          <Route path="/notifications-history" element={<NotificationHistory/>} />
+          <Route path="/my-messages" element={<MyMessages/>} />
           <Route path="/*" element={<Home/>} />
           </Routes>
           <ToastContainer />

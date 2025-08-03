@@ -1,7 +1,7 @@
 import { Field, Formik, Form } from 'formik'
 import { Link } from 'react-router-dom'
 import React, { useState } from "react";
-import axios from "axios";
+import api from '../api/axios';
 import { toast } from 'react-toastify';
 import {
   Typography,
@@ -27,12 +27,7 @@ function Login() {
       email: values.email,
       password: values.password,
     };
-    axios({
-      url: "http://localhost:4000/users/login",
-      method: "POST",
-      data: payload,
-
-    })
+    api.post('/users/login', payload)
       .then((response) => {
         // console.log("Response is :",response)
         if (response.data.user) {

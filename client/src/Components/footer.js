@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link, Stack, Typography } from '@mui/material'
+import { Stack, Typography } from '@mui/material'
 import { BsFacebook, BsInstagram, BsTwitter } from 'react-icons/bs'
 
 const Footer = () => {
@@ -45,18 +45,6 @@ const Footer = () => {
                         </a>
                     </Stack>
                 </Stack>
-                <Link
-                    href="https://github.com/KcMelek/Lost-Found-MERN"
-                    target="_blank"
-                    sx={{
-                        fontSize: '12px',
-                        color: 'white',
-                        margin: 'auto',
-                        opacity: '50%',
-                    }}
-                >
-                    GitHub
-                </Link>
             </Stack>
         </Stack>
     )

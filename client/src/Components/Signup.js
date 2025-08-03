@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import { Field, Formik, Form } from 'formik'
+import { Formik, Form } from 'formik'
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import { Link } from 'react-router-dom'
-import axios from "axios";
-import { Navigate } from "react-router-dom";
+import api from '../api/axios';
 import { toast } from 'react-toastify';
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { storage } from '../firebase.js'
@@ -13,16 +12,14 @@ import {
   Stack,
   Divider,
   TextField,
-  Grid,
-  Box,
   Avatar,
 } from '@mui/material'
 
 
 function Signup() {
+    const [image, setImage] = useState(null);
     const [info, setInfo] = useState("");
     const [progress, setProgress] = useState(0);
-    const [image, setImage] = useState(null);
     
     const handleImageUpload = (e) => {
         if (e.target.files[0]) {
@@ -52,7 +49,7 @@ function Signup() {
               // on complete
               getDownloadURL(uploadTask.snapshot.ref).then(async (imgUrl) => {
                 const payload = { nickname, fullname, email, password, img: imgUrl };
-                await axios.post("http://localhost:4000/users/create", payload)
+                await api.post("/users/create", payload)
                   .then((response) => {
                     setInfo(response.data);
                     if (response.data === "Done") {
@@ -88,7 +85,7 @@ function Signup() {
         } else {
           // No image was selected
           const payload = { nickname, fullname, email, password };
-          await axios.post("http://localhost:4000/users/create", payload)
+          await api.post("/users/create", payload)
             .then((response) => {
               setInfo(response.data);
               if (response.data === "Done") {

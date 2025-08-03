@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { motion } from 'framer-motion'
-import { FcAbout } from 'react-icons/fc';
-import { FcOvertime } from 'react-icons/fc';
-
-import { Link } from 'react-router-dom'
-import { setConstraint } from "../constraints";
+import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { FcAbout, FcOvertime } from 'react-icons/fc';
+import { Link } from 'react-router-dom';
+import { setConstraint } from '../constraints';
 import {
   Button,
   Typography,
@@ -13,8 +11,8 @@ import {
   Avatar,
   Stack,
   Pagination,
-} from '@mui/material'
-import Axios from "axios";
+} from '@mui/material';
+import api from '../api/axios';
 
 const Paginationn = ({ page, setPage, max }) => {
   const handleChange = (event, page) => {
@@ -31,6 +29,15 @@ const Paginationn = ({ page, setPage, max }) => {
       showFirstButton
     />
   );
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: (i) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.1, duration: 0.5, type: 'spring' }
+  })
 };
 
 export default function FoundItems() {
@@ -62,8 +69,8 @@ export default function FoundItems() {
 
   useEffect(() => {
     
-    Axios({
-      url: "http://localhost:4000/items",
+    api({
+      url: "/items",
       method: "GET",
     })
       .then((response) => {      
@@ -76,7 +83,7 @@ export default function FoundItems() {
       const data = allitems.slice(startIndex, endIndex);
 
         let items = [];
-        data.map((item) => {
+        data.map((item, idx) => {
           let created_date = new Date(item.createdAt);
         
           let createdAt =
@@ -98,17 +105,21 @@ export default function FoundItems() {
           
             items.push(
               <motion.div
-              whileHover={{ scale: [null, 1.05, 1.05] }}
-              transition={{ duration: 0.4 }}
-              key={item.name}
-          >
-              <Card
-                  sx={{
-                      width: '270px',
-                      height: '400px',
-                      boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
-                  }}
+                key={item.name}
+                custom={idx}
+                initial="hidden"
+                animate="visible"
+                variants={cardVariants}
+                whileHover={{ scale: 1.04 }}
+                style={{ margin: 8 }}
               >
+                <Card
+                  sx={{
+                    width: '270px',
+                    height: '400px',
+                    boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
+                  }}
+                >
                   <CardContent
                       sx={{
                           borderRadius: '8px',
@@ -203,8 +214,8 @@ export default function FoundItems() {
                                   </Button>
                               </motion.div>
                   </CardContent>
-              </Card>
-          </motion.div>
+                </Card>
+              </motion.div>
             );
           }
         });

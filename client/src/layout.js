@@ -5,17 +5,19 @@ import Footer from "./Components/footer.js";
 
 function Layout(props) {
   return (
-            <Stack
-            spacing="0"
-            width="100%"
-            alignItems="center"
-            height="100vh"
-            justifyContent="space-between"
-        >
+    <Stack
+      spacing={0}
+      width="100%"
+      minHeight="100vh"
+      display="flex"
+      flexDirection="column"
+    >
       <Navbar />
-      {props.children}
-      <Footer/>
-        </Stack>
+      <Stack flex={1} width="100%">
+        {props.children}
+      </Stack>
+      <Footer />
+    </Stack>
   );
 }
 
