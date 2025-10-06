@@ -107,6 +107,10 @@ Lost-Found-MERN-main/
 - Users join rooms based on their user ID for targeted events.
 
 ---
+<img width="1918" height="910" alt="Screenshot 2025-10-06 222104" src="https://github.com/user-attachments/assets/760cfa3b-fe4a-4e91-8b60-dd70cad94ca7" />
+<img width="1879" height="868" alt="Screenshot 2025-10-06 222903" src="https://github.com/user-attachments/assets/e8e34683-7fca-485e-abef-8fe51a0d09fd" />
+<img width="1884" height="879" alt="Screenshot 2025-10-06 222844" src="https://github.com/user-attachments/assets/54282a50-5bd5-43e6-8661-836034f3f86b" />
+<img width="1879" height="868" alt="Screenshot 2025-10-06 222903" src="https://github.com/user-attachments/assets/0c9cb8c9-ed5f-49ce-9522-bf1fae1b50f5" />
 
 ## Axios Configuration
 
